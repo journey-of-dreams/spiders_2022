@@ -3,10 +3,24 @@
 # See documentation in:
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
-from scrapy import signals
+from scrapy import signals, Request
+from scrapy.http import HtmlResponse
 
+from utils import create_chrome_driver
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+
+
+def get_cookies_dict():
+    cookies_str = 'douban-fav-remind=1; bid=XF3W6rbUkY8; ll="118282"; __gads=ID=ff66087e1a6652e7-226b6c35c8d30007:T=1654332316:RT=1654332316:S=ALNI_MZlj506o8F7EKWt2bimpHF-88PWIw; __utmz=30149280.1654334205.6.2.utmcsr=movie.douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/; __utmz=223695111.1654334212.2.2.utmcsr=search.douban.com|utmccn=(referral)|utmcmd=referral|utmcct=/movie/subject_search; _vwo_uuid_v2=DE82AFF89F9900D2BC15F3E4555D5A24A|604d33fc8e65b267944d4b1a36399c6a; __gpi=UID=00000638241d1a33:T=1654332316:RT=1654993800:S=ALNI_MZd7az6fZIWRoSvPtclZGnXryRAGQ; dbcl2="257953901:qINO3RxS9LI"; push_doumail_num=0; push_noty_num=0; __utmv=30149280.25795; ck=sxVG; ap_v=0,6.0; _pk_ref.100001.4cf6=["","",1655909745,"https://search.douban.com/movie/subject_search?search_text=%E5%AE%8C%E7%BE%8E%E4%B8%96%E7%95%8C&cat=1002"]; _pk_id.100001.4cf6=1d0ff0ebb269b265.1654332281.9.1655909745.1655830919.; _pk_ses.100001.4cf6=*; __utma=30149280.450095316.1606837823.1655829298.1655909745.14; __utmb=30149280.0.10.1655909745; __utmc=30149280; __utma=223695111.1207910581.1654332281.1655829298.1655909745.9; __utmb=223695111.0.10.1655909745; __utmc=223695111'
+    cookies_dict = {}
+    for item in cookies_str.split(";"):
+        key, value = item.split("=", maxsplit=1)
+        cookies_dict[key] = value
+    return cookies_dict
+
+
+COOKIES_DICT = get_cookies_dict()
 
 
 class Spider2022SpiderMiddleware:
@@ -67,11 +81,20 @@ class Spider2022DownloaderMiddleware:
         s = cls()
         crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
         return s
+    # def __init__(self):
+    #     self.brower = create_chrome_driver()
 
-    def process_request(self, request, spider):
+    # def __del__(self):
+    #     self.brower.close()
+    def process_request(self, request: Request, spider):
         # Called for each request that goes through the downloader
         # middleware.
+        # 添加代理
+        # request.meta = {"proxy": ""}
 
+        request.cookies = COOKIES_DICT
+        # self.brower.get(request.url)
+        # return HtmlResponse(url=request.url, body=self.brower.page_source, request=request, encoding='utf-8')
         # Must either:
         # - return None: continue processing this request
         # - or return a Response object

@@ -8,10 +8,21 @@
 from itemadapter import ItemAdapter
 import openpyxl
 import pymysql
+from scrapy.crawler import Crawler
+
 
 class DbPipeline:
-    def __init__(self):
-        self.conn = pymysql.connect(host='localhost', port=3306, user='root', passwd='123456', db='zdsc', charset='utf8')
+    def from_crawler(cls, crawler: Crawler):
+        host = crawler.settings['DB_HOST']
+        port = crawler.settings['DB_PORT']
+        username = crawler.settings['DB_USER']
+        password = crawler.settings['DB_PASS']
+        database = crawler.settings['DB_NAME']
+        return cls(host, port, username, password, database)
+
+    def __init__(self, host, port, username, password, database):
+        self.conn = pymysql.connect(host=host, port=port, user=username, passwd=password, db=database,
+                                    charset='utf8mb4', autocommit=True)
         self.cursor = self.conn.cursor()
         self.data = []
         pass
@@ -28,13 +39,14 @@ class DbPipeline:
         rating = item.get("rating", "")
         subject = item.get("subject", "")
         # 改成批量处理
-        self.data.append((title,rating,subject))
+        self.data.append((title, rating, subject))
         if len(self.data) == 100:
             self._write_to_db()
             self.data.clear()
         return item
 
     def _write_to_db(self):
+        # decimal(3,1)
         self.cursor.executemany(
             f'insert into douban250(link,img_src,title,rating,judge_num,inq) values({self.data})'
         )
@@ -49,7 +61,7 @@ class ExcelPipeline:
         # self.sheet = self.wb.active
         # 创建新工作表
         self.sheet = self.wb.create_sheet("Top250")
-        self.sheet.append(("标题", "评分", "主题"))
+        self.sheet.append(("标题", "评分", "主题", "时长", "简介"))
 
     def open_spider(self, spider):
         pass
@@ -63,7 +75,9 @@ class ExcelPipeline:
         title = item.get("title", "")
         rating = item.get("rating", "")
         subject = item.get("subject", "")
+        durating = item.get("durating", "")
+        intro = item.get("intro", "")
         print(title, rating, subject)
-        self.sheet.append((title, rating, subject))
+        self.sheet.append((title, rating, subject, durating, intro))
         # 返回item给其他需要的函数用
         return item

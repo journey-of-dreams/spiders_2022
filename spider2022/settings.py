@@ -12,6 +12,11 @@ BOT_NAME = 'spider2022'
 SPIDER_MODULES = ['spider2022.spiders']
 NEWSPIDER_MODULE = 'spider2022.spiders'
 
+DB_HOST = '127.0.0.1'
+DB_PORT = 3306
+DB_USER = 'root'
+DB_PASS = '123456'
+DB_NAME = 'zdsc'
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36'
 
@@ -27,7 +32,7 @@ ROBOTSTXT_OBEY = False
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
 # 下载延迟
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # 下载随机延迟
 RANDOMIZE_DOWNLOAD_DELAY = True
 # The download delay setting will honor only one of:
@@ -54,9 +59,9 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-# DOWNLOADER_MIDDLEWARES = {
-#    'spider2022.middlewares.Spider2022DownloaderMiddleware': 543,
-# }
+DOWNLOADER_MIDDLEWARES = {
+    'spider2022.middlewares.Spider2022DownloaderMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -69,7 +74,7 @@ RANDOMIZE_DOWNLOAD_DELAY = True
 ITEM_PIPELINES = {
     #  300指的是管道的优先级，数字越小越先执行
     'spider2022.pipelines.ExcelPipeline': 300,
-    'spider2022.pipelines.DbPipeline': 290,
+    # 'spider2022.pipelines.DbPipeline': 290,
 }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
